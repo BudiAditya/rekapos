@@ -586,6 +586,10 @@ class PurchaseController extends AppController {
         $this->Set("Output",$sOutput);
         $this->Set("Reports",$reports);
         $this->Set("company_name", $company->CompanyName);
+        //load mix cabangs
+        $loader = new Cabang();
+        $mixcabangs = $loader->LoadMixCabang($this->userCompanyId);
+        $this->Set("mixcabangs", $mixcabangs);
     }
 
     public function getjson_grnlists($cabangId,$supplierId){

@@ -120,9 +120,11 @@ if ($JnsLaporan < 3) {
         $sheet->setCellValue("B$row", "Kode Barang");
         $sheet->setCellValue("C$row", "Nama Barang");
         $sheet->setCellValue("D$row", "Satuan");
-        $sheet->setCellValue("E$row", "Q T Y");
-        $sheet->setCellValue("F$row", "Nilai Retur");
-        $sheet->getStyle("A$row:F$row")->applyFromArray(array_merge($center, $allBorders));
+        $sheet->setCellValue("E$row", "Bagus");
+        $sheet->setCellValue("F$row", "Rusak");
+        $sheet->setCellValue("G$row", "Expire");
+        $sheet->setCellValue("H$row", "Nilai Retur");
+        $sheet->getStyle("A$row:H$row")->applyFromArray(array_merge($center, $allBorders));
         $nmr = 0;
         $str = $row;
         if ($Reports != null) {
@@ -133,9 +135,11 @@ if ($JnsLaporan < 3) {
                 $sheet->setCellValueExplicit("B$row", $rpt['item_code'],PHPExcel_Cell_DataType::TYPE_STRING);
                 $sheet->setCellValue("C$row", $rpt['item_descs']);
                 $sheet->setCellValue("D$row", $rpt['satuan']);
-                $sheet->setCellValue("E$row", $rpt['sum_qty']);
-                $sheet->setCellValue("F$row", $rpt['sum_total']);
-                $sheet->getStyle("A$row:F$row")->applyFromArray(array_merge($allBorders));
+                $sheet->setCellValue("E$row", $rpt['qty_bagus']);
+                $sheet->setCellValue("F$row", $rpt['qty_rusak']);
+                $sheet->setCellValue("G$row", $rpt['qty_expire']);
+                $sheet->setCellValue("H$row", $rpt['sum_total']);
+                $sheet->getStyle("A$row:H$row")->applyFromArray(array_merge($allBorders));
             }
             $edr = $row;
             $row++;
@@ -144,8 +148,10 @@ if ($JnsLaporan < 3) {
             $sheet->getStyle("A$row")->applyFromArray($center);
             $sheet->setCellValue("E$row","=SUM(E$str:E$edr)");
             $sheet->setCellValue("F$row","=SUM(F$str:F$edr)");
-            $sheet->getStyle("E$str:F$row")->applyFromArray($idrFormat);
-            $sheet->getStyle("A$row:F$row")->applyFromArray(array_merge($allBorders));
+            $sheet->setCellValue("G$row","=SUM(G$str:G$edr)");
+            $sheet->setCellValue("H$row","=SUM(H$str:H$edr)");
+            $sheet->getStyle("E$str:H$row")->applyFromArray($idrFormat);
+            $sheet->getStyle("A$row:H$row")->applyFromArray(array_merge($allBorders));
         }
 }
 // Flush to client
@@ -153,6 +159,7 @@ if ($JnsLaporan < 3) {
 foreach ($headers as $header) {
     header($header);
 }
+
 // Hack agar client menutup loading dialog box... (Ada JS yang checking cookie ini pada common.js)
 $writer->save("php://output");
 

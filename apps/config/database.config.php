@@ -38,7 +38,7 @@ $settings->DriverType = "mysqli";
 $settings->Username = "root";
 $settings->Password = "";
 $settings->Host = "127.0.0.1";
-$settings->Port = 3308;
+$settings->Port = 3307;
 $settings->DatabaseName = "db_rekapos_member";
 // These settings will affect error reporting and will set to true for development debugging. Please change to false to production
 $settings->SuppressPhpError = true;

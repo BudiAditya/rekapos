@@ -8,8 +8,13 @@
 
 class Transaksi extends EntityBase {
 
+    public function __construct($id = null) {
+        parent::__construct();
+        $this->connector = ConnectorManager::GetPool("member");
+    }
+
     public function Load4Reports($cabangId = 0, $trxStatus = -1, $startDate = null, $endDate = null) {
-        $sql = "SELECT a.* FROM vw_pos_master AS a";
+        $sql = "SELECT a.* FROM vw_pos_master_mix AS a";
         $sql.= " WHERE a.tanggal BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
@@ -28,7 +33,7 @@ class Transaksi extends EntityBase {
     }
 
     public function Load4ReportsDetail($cabangId = 0, $trxStatus = -1, $startDate = null, $endDate = null) {
-        $sql = "SELECT a.*,b.item_code,c.bnama AS item_descs,b.qty_keluar AS qty,b.harga AS price,b.diskon_persen,b.diskon_nilai,b.sub_total FROM vw_pos_master AS a Join t_pos_detail AS b On a.trx_no = b.trx_no Join m_barang AS c ON b.item_code = c.bkode";
+        $sql = "SELECT a.*,b.item_code,b.item_name AS item_descs,b.qty_keluar AS qty,b.harga AS price,b.diskon_persen,b.diskon_nilai,b.sub_total FROM vw_pos_master_mix AS a Join vw_pos_detail_mix AS b On a.trx_no = b.trx_no";
         $sql.= " WHERE a.tanggal BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
@@ -47,8 +52,8 @@ class Transaksi extends EntityBase {
     }
 
     public function Load4ReportsRekapItem($cabangId = 0, $trxStatus = -1, $startDate = null, $endDate = null) {
-        $sql = "SELECT b.item_code,c.bnama AS item_descs,b.satuan,b.harga AS price, coalesce(sum(b.qty_keluar),0) as sum_qty,coalesce(sum(b.sub_total),0) as sum_total, 0 as sum_tax";
-        $sql.= " FROM vw_pos_master AS a Join t_pos_detail AS b On a.trx_no = b.trx_no Left Join m_barang AS c On b.item_code = c.bkode";
+        $sql = "SELECT b.item_code,b.bnama AS item_descs,b.satuan,b.harga AS price, coalesce(sum(b.qty_keluar),0) as sum_qty,coalesce(sum(b.sub_total),0) as sum_total, 0 as sum_tax";
+        $sql.= " FROM vw_pos_master_mix AS a Join vw_pos_detail_mix AS b On a.trx_no = b.trx_no";
         $sql.= " WHERE a.tanggal BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
@@ -58,7 +63,7 @@ class Transaksi extends EntityBase {
         }else{
             $sql.= " and a.trx_status <> 3 ";
         }
-        $sql.= " Group By b.item_code,c.bnama,b.satuan,b.harga Order By c.bnama,b.item_code,b.harga";
+        $sql.= " Group By b.item_code,b.bnama,b.satuan,b.harga Order By b.bnama,b.item_code,b.harga";
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?startdate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?enddate", date('Y-m-d', $endDate));
@@ -67,16 +72,16 @@ class Transaksi extends EntityBase {
     }
 
     public function LoadPosMaster($id){
-        $sql = "Select a.*,b.bank,b.no_kartu,b.nama_pemilik,b.admin_persen,b.admin_nilai From vw_pos_master AS a LEFT JOIN t_pos_trxkartu AS b ON a.trx_no = b.trx_no Where a.id = $id";
+        $sql = "Select a.*,b.bank,b.no_kartu,b.nama_pemilik,b.admin_persen,b.admin_nilai From vw_pos_master_mix AS a LEFT JOIN vw_pos_trxkartu_mix AS b ON a.trx_no = b.trx_no Where a.id = $id";
         $this->connector->CommandText = $sql;
         $rs = $this->connector->ExecuteQuery();
         return $rs->FetchAssoc();
     }
 
     public function LoadPosDetail($id){
-        $sql = "Select a.*,b.bnama as item_name,b.bbarcode";
-        $sql.= " From t_pos_detail AS a JOIN m_barang AS b ON a.item_code = b.bkode JOIN t_pos_master AS c ON a.trx_no = c.trx_no";
-        $sql.= " Where a.qty_keluar > 0 And c.id = $id Order By a.id";
+        $sql = "Select a.*";
+        $sql.= " From vw_pos_detail_mix AS a JOIN vw_pos_master_mix AS b ON a.trx_no = b.trx_no";
+        $sql.= " Where a.qty_keluar > 0 And b.id = $id Order By a.id";
         $this->connector->CommandText = $sql;
         $rs = $this->connector->ExecuteQuery();
         return $rs;
@@ -163,4 +168,74 @@ class Transaksi extends EntityBase {
         return $rs;
     }
 
+    public function GetPosSumByYear($tahun,$cabId){
+        $query = "SELECT COALESCE(SUM(CASE WHEN month(a.tanggal) = 1 THEN a.sub_total ELSE 0 END), 0) January
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 2 THEN a.sub_total ELSE 0 END), 0) February
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 3 THEN a.sub_total ELSE 0 END), 0) March
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 4 THEN a.sub_total ELSE 0 END), 0) April
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 5 THEN a.sub_total ELSE 0 END), 0) May
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 6 THEN a.sub_total ELSE 0 END), 0) June
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 7 THEN a.sub_total ELSE 0 END), 0) July
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 8 THEN a.sub_total ELSE 0 END), 0) August
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 9 THEN a.sub_total ELSE 0 END), 0) September
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 10 THEN a.sub_total ELSE 0 END), 0) October
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 11 THEN a.sub_total ELSE 0 END), 0) November
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 12 THEN a.sub_total ELSE 0 END), 0) December
+			    FROM vw_pos_master a Where year(a.tanggal) = $tahun And a.cabang_id = $cabId";
+        $this->connector->CommandText = $query;
+        $rs = $this->connector->ExecuteQuery();
+        $row = $rs->FetchAssoc();
+        $data = $row["January"];
+        $data.= ",".$row["February"];
+        $data.= ",".$row["March"];
+        $data.= ",".$row["April"];
+        $data.= ",".$row["May"];
+        $data.= ",".$row["June"];
+        $data.= ",".$row["July"];
+        $data.= ",".$row["August"];
+        $data.= ",".$row["September"];
+        $data.= ",".$row["October"];
+        $data.= ",".$row["November"];
+        $data.= ",".$row["December"];
+        return $data;
+    }
+
+    public function GetDataPosSumByMonth($tahun,$cabId){
+        $query = "SELECT COALESCE(SUM(CASE WHEN month(a.tanggal) = 1 THEN a.sub_total ELSE 0 END), 0) January
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 2 THEN a.sub_total ELSE 0 END), 0) February
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 3 THEN a.sub_total ELSE 0 END), 0) March
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 4 THEN a.sub_total ELSE 0 END), 0) April
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 5 THEN a.sub_total ELSE 0 END), 0) May
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 6 THEN a.sub_total ELSE 0 END), 0) June
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 7 THEN a.sub_total ELSE 0 END), 0) July
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 8 THEN a.sub_total ELSE 0 END), 0) August
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 9 THEN a.sub_total ELSE 0 END), 0) September
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 10 THEN a.sub_total ELSE 0 END), 0) October
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 11 THEN a.sub_total ELSE 0 END), 0) November
+				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 12 THEN a.sub_total ELSE 0 END), 0) December
+			    FROM vw_pos_master a Where year(a.tanggal) = $tahun And a.cabang_id = $cabId";
+        $this->connector->CommandText = $query;
+        $rs = $this->connector->ExecuteQuery();
+        return $rs->FetchAssoc();
+    }
+
+    public function LoadTop10Item($cabangId,$tahun) {
+        $sql = "Select a.item_code,a.item_descs as item_name,a.nilai From vw_ar_omset_item_by_year a Where a.tahun = $tahun And a.cabang_id = $cabangId Order By a.nilai Desc Limit 10;";
+        $this->connector->CommandText = $sql;
+        $rs = $this->connector->ExecuteQuery();
+        return $rs;
+    }
+
+    public function GetJSonTop10Item($cabangId,$tahun){
+        $query = "Select a.item_code as kode, a.nilai,zfc_random_color() as warna From vw_ar_omset_item_by_year a Where a.tahun = $tahun And a.cabang_id = $cabangId Order By a.nilai Desc Limit 10;";
+        $this->connector->CommandText = $query;
+        $rs = $this->connector->ExecuteQuery();
+        $result = array();
+        if ($rs != null) {
+            while ($row = $rs->FetchAssoc()) {
+                $result[] = $row;
+            }
+        }
+        return $result;
+    }
 }

@@ -325,4 +325,11 @@ ORDER BY $orderBy";
 		$result = $rows;
 		return $result;
 	}
+
+	public function LoadMixCabang($entityId){
+	    $sql = "Select a.* From vw_m_cabang a Where a.entity_id = ".$entityId;
+        $this->connector = ConnectorManager::GetPool("member");
+        $this->connector->CommandText = $sql;
+        return $this->connector->ExecuteQuery();
+    }
 }

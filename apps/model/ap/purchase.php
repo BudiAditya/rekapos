@@ -389,7 +389,7 @@ On a.id = b.grn_id Set a.base_amount = b.sumPrice, a.disc1_amount = if(a.disc1_p
     }
 
     public function Load4Reports($entityId,$cabangId = 0, $supplierId = 0, $grnStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null) {
-        $sql = "SELECT a.* FROM vw_ap_purchase_master AS a";
+        $sql = "SELECT a.* FROM vw_purchase_master_mix AS a";
         $sql.= " WHERE a.is_deleted = 0 and a.grn_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
@@ -410,6 +410,7 @@ On a.id = b.grn_id Set a.base_amount = b.sumPrice, a.disc1_amount = if(a.disc1_p
             $sql.= " and a.supplier_id = ".$supplierId;
         }
         $sql.= " Order By a.grn_date,a.grn_no,a.id";
+        $this->connector = ConnectorManager::GetPool("member");
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?startdate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?enddate", date('Y-m-d', $endDate));
@@ -419,7 +420,7 @@ On a.id = b.grn_id Set a.base_amount = b.sumPrice, a.disc1_amount = if(a.disc1_p
 
     public function Load4ReportsDetail($entityId,$cabangId = 0, $supplierId = 0, $grnStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null) {
         $sql = "SELECT a.*,b.item_code,b.item_descs,b.purchase_qty as qty,b.price,b.disc_formula,b.disc_amount,b.sub_total,b.tax_amount AS dtax_amount,b.is_free";
-        $sql.= " FROM vw_ap_purchase_master AS a Join t_ap_purchase_detail AS b On a.grn_no = b.grn_no";
+        $sql.= " FROM vw_purchase_master_mix AS a Join vw_purchase_detail_mix AS b On a.grn_no = b.grn_no";
         $sql.= " WHERE a.is_deleted = 0 and a.grn_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
@@ -440,6 +441,7 @@ On a.id = b.grn_id Set a.base_amount = b.sumPrice, a.disc1_amount = if(a.disc1_p
             $sql.= " and a.supplier_id = ".$supplierId;
         }
         $sql.= " Order By a.grn_date,a.grn_no,a.id";
+        $this->connector = ConnectorManager::GetPool("member");
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?startdate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?enddate", date('Y-m-d', $endDate));
@@ -448,8 +450,8 @@ On a.id = b.grn_id Set a.base_amount = b.sumPrice, a.disc1_amount = if(a.disc1_p
     }
 
     public function Load4ReportsRekapItem($entityId,$cabangId = 0, $supplierId = 0, $grnStatus = -1, $paymentStatus = -1, $startDate = null, $endDate = null) {
-        $sql = "SELECT b.item_code,b.item_descs,c.bsatkecil as satuan,coalesce(sum(b.purchase_qty),0) as sum_qty,coalesce(sum(b.sub_total),0) as sum_total, sum(Case When a.tax_pct > 0 Then Round(b.sub_total * (a.tax_pct/100),0) Else 0 End) as sum_tax";
-        $sql.= " FROM vw_ap_purchase_master AS a Join t_ap_purchase_detail AS b On a.grn_no = b.grn_no Left Join m_barang AS c On b.item_code = c.bkode";
+        $sql = "SELECT b.item_code,b.item_descs,b.bsatkecil as satuan,coalesce(sum(b.purchase_qty),0) as sum_qty,coalesce(sum(b.sub_total),0) as sum_total, sum(Case When a.tax_pct > 0 Then Round(b.sub_total * (a.tax_pct/100),0) Else 0 End) as sum_tax";
+        $sql.= " FROM vw_purchase_master_mix AS a Join vw_purchase_detail_mix AS b On a.grn_no = b.grn_no";
         $sql.= " WHERE a.is_deleted = 0 and a.grn_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
@@ -469,7 +471,8 @@ On a.id = b.grn_id Set a.base_amount = b.sumPrice, a.disc1_amount = if(a.disc1_p
         if ($supplierId > 0){
             $sql.= " and a.supplier_id = ".$supplierId;
         }
-        $sql.= " Group By b.item_code,b.item_descs,c.bsatkecil Order By b.item_descs,b.item_code";
+        $sql.= " Group By b.item_code,b.item_descs,b.bsatkecil Order By b.item_descs,b.item_code";
+        $this->connector = ConnectorManager::GetPool("member");
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?startdate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?enddate", date('Y-m-d', $endDate));

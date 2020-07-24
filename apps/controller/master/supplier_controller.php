@@ -41,20 +41,26 @@ class SupplierController extends AppController {
 			}
 			if ($acl->CheckUserAccess("master.supplier", "edit")) {
 				$settings["actions"][] = array("Text" => "Edit", "Url" => "master.contacts/edit/2/%s", "Class" => "bt_edit", "ReqId" => 1,
-						"Error" => "Maaf anda harus memilih data contact terlebih dahulu sebelum proses edit.\nPERHATIAN: Pilih tepat 1 data contact",
+						"Error" => "Maaf anda harus memilih data supplier terlebih dahulu sebelum proses edit.\nPERHATIAN: Pilih tepat 1 data supplier",
 						"Confirm" => "");
 			}
 			if ($acl->CheckUserAccess("master.supplier", "view")) {
 				$settings["actions"][] = array("Text" => "View", "Url" => "master.contacts/view/2/%s", "Class" => "bt_view", "ReqId" => 1,
-					"Error" => "Maaf anda harus memilih data contact terlebih dahulu.\nPERHATIAN: Pilih tepat 1 data contact",
+					"Error" => "Maaf anda harus memilih data supplier terlebih dahulu.\nPERHATIAN: Pilih tepat 1 data supplier",
 					"Confirm" => "");
 			}
-			$settings["actions"][] = array("Text" => "separator", "Url" => null);
 			if ($acl->CheckUserAccess("master.supplier", "delete")) {
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
 				$settings["actions"][] = array("Text" => "Delete", "Url" => "master.contacts/delete/2/%s", "Class" => "bt_delete", "ReqId" => 1,
-					"Error" => "Maaf anda harus memilih data contact terlebih dahulu sebelum proses hapus data.\nPERHATIAN: Pilih tepat 1 data contact",
-					"Confirm" => "Apakah anda yakin mau menghapus data contact yang dipilih ? \n\n** Penghapusan Data akan mempengaruhi data transaksi yang berkaitan ** \n\nKlik 'OK' untuk melanjutkan prosedur");
+					"Error" => "Maaf anda harus memilih data supplier terlebih dahulu sebelum proses hapus data.\nPERHATIAN: Pilih tepat 1 data supplier",
+					"Confirm" => "Apakah anda yakin mau menghapus data supplier yang dipilih ? \n\n** Penghapusan Data akan mempengaruhi data transaksi yang berkaitan ** \n\nKlik 'OK' untuk melanjutkan prosedur");
 			}
+            if ($acl->CheckUserAccess("master.supplier", "view")) {
+                $settings["actions"][] = array("Text" => "separator", "Url" => null);
+                $settings["actions"][] = array("Text" => "Daftar Barang", "Url" => "master.supplier/itemlist/%s", "Class" => "bt_view", "ReqId" => 1,
+                    "Error" => "Maaf anda harus memilih data supplier terlebih dahulu.\nPERHATIAN: Pilih tepat 1 data supplier",
+                    "Confirm" => "");
+            }
 			$settings["def_order"] = 2;
 			$settings["def_filter"] = 1;
 			$settings["singleSelect"] = true;
@@ -65,4 +71,20 @@ class SupplierController extends AppController {
 		$dispatcher = Dispatcher::CreateInstance();
 		$dispatcher->Dispatch("utilities", "flexigrid", array(), $settings, null, true);
 	}
+	
+	public function itemlist($suppId = 0){
+	    require_once (MODEL . "master/items.php");
+        $supplier = new Contacts($suppId);
+        $items = new Items();
+        $items = $items->LoadBySupplierId($suppId,1,'a.bnama');
+        if (count($this->postData) > 0) {
+            $output = $this->GetPostValue("output");
+        }else{
+            $output = 1;
+        }
+        //kirim ke view
+        $this->Set("dtSupplier",$supplier);
+        $this->Set("dtItems",$items);
+        $this->Set("output",$output);
+    }
 }

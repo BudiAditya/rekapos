@@ -71,6 +71,10 @@ class MutasiController extends AppController {
         $this->Set("userCabCode",$cabCode);
         $this->Set("userCabName",$cabName);
         $this->Set("userLevel",$this->userLevel);
+        //load mix cabangs
+        $loader = new Cabang();
+        $mixcabangs = $loader->LoadMixCabang($this->userCompanyId);
+        $this->Set("mixcabangs", $mixcabangs);
     }
 }
 

@@ -254,7 +254,7 @@ class Stock extends EntityBase {
             $sqx .= " From t_pos_return_master a Join t_pos_return_detail b On a.rtn_no = b.rtn_no";
             $sqx .= " Where b.item_code = ?item_code and a.cabang_id = ?cabang_id and b.is_posted = 1 and a.rtn_status <> 3";
             $this->connector->CommandText = $sqx;
-            $this->connector->AddParameter("?item_code", $this->ItemCode, "char");
+            $this->connector->AddParameter("?item_code", $this->ItemCode, "varchar");
             $this->connector->AddParameter("?cabang_id", $this->CabangId);
             $rs = $this->connector->ExecuteNonQuery();
         //}
@@ -296,7 +296,7 @@ class Stock extends EntityBase {
             $sqx = "Insert Into `tmp_card` (trx_date,trx_type,trx_url,price,keluar,relasi)";
             $sqx .= " Select date(a.waktu),concat('Penjualan - ',a.trx_no),'-',b.harga,b.qty_keluar,'Cash'";
             $sqx .= " From t_pos_master as a Join t_pos_detail as b On a.trx_no = b.trx_no";
-            $sqx .= " Where b.item_code = ?item_code and a.cabang_id = ?cabang_id and b.is_posted = 1 and a.trx_status <> 3";
+            $sqx .= " Where b.item_code = ?item_code and a.cabang_id = ?cabang_id and a.trx_status <> 3";
             $this->connector->CommandText = $sqx;
             $this->connector->AddParameter("?item_code", $this->ItemCode, "char");
             $this->connector->AddParameter("?cabang_id", $this->CabangId);

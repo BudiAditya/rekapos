@@ -296,7 +296,7 @@ WHERE id = ?id';
     }
 
     public function GetDataPos($noTrx = null) {
-        $this->connector->CommandText = "SELECT a.* FROM vw_t_pos_master AS a WHERE a.trx_no = ?txn And a.trx_status < 3";
+        $this->connector->CommandText = "SELECT a.* FROM vw_pos_master_mix AS a WHERE a.trx_no = ?txn And a.trx_status < 3";
         $this->connector->AddParameter("?txn", $noTrx);
         $rs = $this->connector->ExecuteQuery();
         return $rs;
@@ -326,7 +326,7 @@ WHERE id = ?id';
     }
 
     public function RekapPoin($entityId = 0){
-        $sqx = "Update m_member a Join (Select c.cust_code,sum(c.jum_poin) as sum_poin From vw_t_pos_master c Group By c.cust_code) b";
+        $sqx = "Update m_member a Join (Select c.cust_code,sum(c.jum_poin) as sum_poin From vw_pos_master_mix c Group By c.cust_code) b";
         $sqx.= " On a.no_member = b.cust_code Set a.poin_aktif = b.sum_poin Where a.status_member = 1 And a.entity_id = ".$entityId;
         $this->connector->CommandText = $sqx;
         $rs = $this->connector->ExecuteNonQuery();
@@ -345,7 +345,7 @@ WHERE id = ?id';
     }
 
     public function HistoryPoin($noMember){
-        $this->connector->CommandText = "SELECT a.waktu,a.trx_no,a.total_transaksi,a.jum_poin,a.kode_promo FROM vw_t_pos_master AS a WHERE a.cust_code = ?nom And a.jum_poin > 0 Order By a.waktu,a.trx_no";
+        $this->connector->CommandText = "SELECT a.waktu,a.trx_no,a.total_transaksi,a.jum_poin,a.kode_promo FROM vw_pos_master_mix AS a WHERE a.cust_code = ?nom And a.jum_poin > 0 Order By a.waktu,a.trx_no";
         $this->connector->AddParameter("?nom", $noMember);
         $rs = $this->connector->ExecuteQuery();
         return $rs;

@@ -128,6 +128,33 @@ class Items extends EntityBase {
         return $result;
     }
 
+    public function LoadBySupplierId($suppId = 0,$itemStatus = 1,$orderBy = "a.bkode", $includeDeleted = false) {
+        $sqx = "SELECT a.* FROM vw_m_barang AS a Join m_contacts b ON a.bsupplier = b.contact_code";
+        if ($itemStatus == -1){
+            $sqx.= " Where a.bisaktif > -1";
+        }else{
+            $sqx.= " Where a.bisaktif = $itemStatus";
+        }
+        if ($includeDeleted) {
+            $sqx.= " And a.is_deleted = 0";
+        }
+        if ($suppId > 0){
+            $sqx.= " And b.id = ".$suppId;
+        }
+        $sqx.= " ORDER BY $orderBy;";
+        $this->connector->CommandText = $sqx;
+        $rs = $this->connector->ExecuteQuery();
+        $result = array();
+        if ($rs != null) {
+            while ($row = $rs->FetchAssoc()) {
+                $temp = new Items();
+                $temp->FillProperties($row);
+                $result[] = $temp;
+            }
+        }
+        return $result;
+    }
+
 	/**
 	 * @param int $bid
 	 * @return Location

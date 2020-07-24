@@ -149,7 +149,7 @@ class Payment extends EntityBase {
     }
 
     public function Load4Reports($entityId,$cabangId = 0,$bankId = 0, $creditorId = 0, $paymentMode = -1, $paymentStatus = -1, $startDate = null, $endDate = null) {
-        $sql = "SELECT a.* FROM vw_ap_payment_master AS a";
+        $sql = "SELECT a.* FROM vw_ap_payment_master_mix AS a";
         $sql.= " WHERE a.is_deleted = 0 and a.payment_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
@@ -171,6 +171,7 @@ class Payment extends EntityBase {
             $sql.= " and a.payment_mode = ".$paymentMode;
         }
         $sql.= " Order By a.payment_date, a.id";
+        $this->connector = ConnectorManager::GetPool("member");
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?startdate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?enddate", date('Y-m-d', $endDate));

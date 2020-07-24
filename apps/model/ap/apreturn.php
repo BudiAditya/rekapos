@@ -250,7 +250,7 @@ WHERE id = ?id";
 
     //$reports = $rb->Load4Reports($sCabangId,$sSupplierId,$sSalesId,$sStatus,$sPaymentStatus,$sStartDate,$sEndDate);
     public function Load4Reports($entityId,$cabangId = 0, $supplierId = 0, $kondisi =0, $startDate = null, $endDate = null) {
-        $sql = "SELECT a.* FROM vw_ap_return_master AS a";
+        $sql = "SELECT a.* FROM vw_ap_return_master_mix AS a";
         $sql.= " WHERE a.is_deleted = 0 and a.rb_status <> 3 and a.rb_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
@@ -261,6 +261,7 @@ WHERE id = ?id";
             $sql.= " and a.supplier_id = ".$supplierId;
         }
         $sql.= " Order By a.rb_date,a.rb_no,a.id";
+        $this->connector = ConnectorManager::GetPool("member");
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?startdate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?enddate", date('Y-m-d', $endDate));
@@ -269,7 +270,7 @@ WHERE id = ?id";
     }
 
     public function Load4ReportsDetail($entityId, $cabangId = 0, $supplierId = 0, $kondisi = 0, $startDate = null, $endDate = null) {
-        $sql = "SELECT	a.*, b.item_code,b.ex_grn_no,b.item_descs,b.qty_retur,b.price,b.sub_total,b.tax_amount,b.kondisi FROM vw_ap_return_master AS a JOIN t_ap_return_detail b ON a.rb_no = b.rb_no";
+        $sql = "SELECT	a.*, b.item_code,b.ex_grn_no,b.item_descs,b.qty_retur,b.price,b.sub_total,b.tax_amount,b.kondisi FROM vw_ap_return_master_mix AS a JOIN vw_ap_return_detail_mix b ON a.rb_no = b.rb_no";
         $sql.= " WHERE a.is_deleted = 0 and a.rb_status <> 3 and a.rb_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
@@ -283,6 +284,7 @@ WHERE id = ?id";
             $sql.= " and a.supplier_id = ".$supplierId;
         }
         $sql.= " Order By a.rb_date,a.rb_no,a.id";
+        $this->connector = ConnectorManager::GetPool("member");
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?startdate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?enddate", date('Y-m-d', $endDate));
@@ -291,8 +293,8 @@ WHERE id = ?id";
     }
 
     public function Load4ReportsRekapItem($entityId, $cabangId = 0, $supplierId = 0, $kondisi = 0, $startDate = null, $endDate = null) {
-        $sql = "SELECT b.item_code,b.item_descs,c.bsatkecil as satuan,coalesce(sum(if(b.kondisi = 1,b.qty_retur,0)),0) as qty_bagus,coalesce(sum(if(b.kondisi = 2,b.qty_retur,0)),0) as qty_rusak,coalesce(sum(if(b.kondisi = 3,b.qty_retur,0)),0) as qty_expire,coalesce(sum(b.sub_total+b.tax_amount),0) as sum_total";
-        $sql.= " FROM vw_ap_return_master AS a Join t_ap_return_detail AS b On a.rb_no = b.rb_no Left Join m_barang AS c On b.item_code = c.bkode";
+        $sql = "SELECT b.item_code,b.item_descs,'Pcs' as satuan,coalesce(sum(if(b.kondisi = 1,b.qty_retur,0)),0) as qty_bagus,coalesce(sum(if(b.kondisi = 2,b.qty_retur,0)),0) as qty_rusak,coalesce(sum(if(b.kondisi = 3,b.qty_retur,0)),0) as qty_expire,coalesce(sum(b.sub_total+b.tax_amount),0) as sum_total";
+        $sql.= " FROM vw_ap_return_master_mix AS a Join vw_ap_return_detail_mix AS b On a.rb_no = b.rb_no";
         $sql.= " WHERE a.is_deleted = 0 and a.rb_status <> 3 and a.rb_date BETWEEN ?startdate and ?enddate";
         if ($cabangId > 0){
             $sql.= " and a.cabang_id = ".$cabangId;
@@ -305,7 +307,8 @@ WHERE id = ?id";
         if ($supplierId > 0){
             $sql.= " and a.supplier_id = ".$supplierId;
         }
-        $sql.= " Group By b.item_code,b.item_descs,c.bsatkecil Order By b.item_descs,b.item_code";
+        $sql.= " Group By b.item_code,b.item_descs Order By b.item_descs,b.item_code";
+        $this->connector = ConnectorManager::GetPool("member");
         $this->connector->CommandText = $sql;
         $this->connector->AddParameter("?startdate", date('Y-m-d', $startDate));
         $this->connector->AddParameter("?enddate", date('Y-m-d', $endDate));

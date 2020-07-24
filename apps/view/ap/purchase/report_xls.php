@@ -9,7 +9,7 @@
 $phpExcel = new PHPExcel();
 $headers = array(
     'Content-Type: application/vnd.ms-excel'
-, 'Content-Disposition: attachment;filename="print-rekap-ar-invoice.xls"'
+, 'Content-Disposition: attachment;filename="print-rekap-ap-invoice.xls"'
 , 'Cache-Control: max-age=0'
 );
 $writer = new PHPExcel_Writer_Excel5($phpExcel);
@@ -52,24 +52,24 @@ if ($JnsLaporan < 3) {
     $sheet->setCellValue("C$row", "Tanggal");
     $sheet->setCellValue("D$row", "No. GRN");
     $sheet->setCellValue("E$row", "Nama Supplier");
-    $sheet->setCellValue("F$row", "Keterangan");
-    $sheet->setCellValue("G$row", "Jth. Tempo");
-    $sheet->setCellValue("H$row", "Jumlah");
-    $sheet->setCellValue("I$row", "Terbayar");
-    $sheet->setCellValue("J$row", "Outstanding");
-    $sheet->setCellValue("J$row", "Outstanding");
-    if ($JnsLaporan == 2) {
-        $sheet->setCellValue("K$row", 'Kode Barang');
-        $sheet->setCellValue("L$row", 'Nama Barang');
-        $sheet->setCellValue("M$row", 'QTY');
-        $sheet->setCellValue("N$row", 'Harga');
-        $sheet->setCellValue("O$row", 'Disc(%)');
-        $sheet->setCellValue("P$row", 'Discount');
-        $sheet->setCellValue("Q$row", 'Jumlah');
-        $sheet->getStyle("A$row:Q$row")->applyFromArray(array_merge($center, $allBorders));
-    }else {
-        $sheet->getStyle("A$row:J$row")->applyFromArray(array_merge($center, $allBorders));
+    if ($JnsLaporan == 1) {
+        $sheet->setCellValue("F$row", "Keterangan");
+        $sheet->setCellValue("G$row", "Jth. Tempo");
+        $sheet->setCellValue("H$row", "Jumlah");
+        $sheet->setCellValue("I$row", "Diskon");
+        $sheet->setCellValue("J$row", "Retur");
+        $sheet->setCellValue("K$row", "Terbayar");
+        $sheet->setCellValue("L$row", "Outstanding");
+    }else{
+        $sheet->setCellValue("F$row", 'Kode Barang');
+        $sheet->setCellValue("G$row", 'Nama Barang');
+        $sheet->setCellValue("H$row", 'QTY');
+        $sheet->setCellValue("I$row", 'Harga');
+        $sheet->setCellValue("J$row", 'Disc(%)');
+        $sheet->setCellValue("K$row", 'Discount');
+        $sheet->setCellValue("L$row", 'Jumlah');
     }
+    $sheet->getStyle("A$row:L$row")->applyFromArray(array_merge($center, $allBorders));
     $nmr = 0;
     $str = $row;
     if ($Reports != null) {
@@ -90,23 +90,26 @@ if ($JnsLaporan < 3) {
                 $sheet->setCellValue("C$row", date('d-m-Y', strtotime($rpt["grn_date"])));
                 $sheet->setCellValue("D$row", $rpt["grn_no"]);
                 $sheet->setCellValue("E$row", $rpt["supplier_name"]);
-                $sheet->setCellValue("F$row", $rpt["grn_descs"]);
-                $sheet->setCellValue("G$row", date('d-m-Y', strtotime($rpt["due_date"])));
-                $sheet->setCellValue("H$row", $rpt["total_amount"]);
-                $sheet->setCellValue("I$row", $rpt["paid_amount"]);
-                $sheet->setCellValue("J$row", $rpt["balance_amount"]);
-                $sheet->getStyle("A$row:J$row")->applyFromArray(array_merge($allBorders));
+                if ($JnsLaporan == 1) {
+                    $sheet->setCellValue("F$row", $rpt["grn_descs"]);
+                    $sheet->setCellValue("G$row", date('d-m-Y', strtotime($rpt["due_date"])));
+                    $sheet->setCellValue("H$row", $rpt["base_amount"]);
+                    $sheet->setCellValue("I$row", $rpt["disc1_amount"]);
+                    $sheet->setCellValue("J$row", $rpt["return_amount"]);
+                    $sheet->setCellValue("K$row", $rpt["paid_amount"]);
+                    $sheet->setCellValue("L$row", $rpt["balance_amount"]);
+                }
             }
             if ($JnsLaporan == 2) {
-                $sheet->setCellValueExplicit("K$row", $rpt['item_code'],PHPExcel_Cell_DataType::TYPE_STRING);
-                $sheet->setCellValue("L$row", $rpt['item_descs']);
-                $sheet->setCellValue("M$row", $rpt['qty']);
-                $sheet->setCellValue("N$row", $rpt['price']);
-                $sheet->setCellValue("O$row", $rpt['disc_formula']);
-                $sheet->setCellValue("P$row", $rpt['disc_amount']);
-                $sheet->setCellValue("Q$row", $rpt['sub_total']);
-                $sheet->getStyle("K$row:Q$row")->applyFromArray(array_merge($allBorders));
+                $sheet->setCellValueExplicit("F$row", $rpt['item_code'],PHPExcel_Cell_DataType::TYPE_STRING);
+                $sheet->setCellValue("G$row", $rpt['item_descs']);
+                $sheet->setCellValue("H$row", $rpt['qty']);
+                $sheet->setCellValue("I$row", $rpt['price']);
+                $sheet->setCellValue("J$row", $rpt['disc_formula']);
+                $sheet->setCellValue("K$row", $rpt['disc_amount']);
+                $sheet->setCellValue("L$row", $rpt['sub_total']);
             }
+            $sheet->getStyle("A$row:L$row")->applyFromArray(array_merge($allBorders));
             $ivn = $rpt["grn_no"];
         }
         $edr = $row;
@@ -114,17 +117,17 @@ if ($JnsLaporan < 3) {
         $sheet->setCellValue("A$row", "GRAND TOTAL INVOICE");
         $sheet->mergeCells("A$row:G$row");
         $sheet->getStyle("A$row")->applyFromArray($center);
-        $sheet->setCellValue("H$row", "=SUM(H$str:H$edr)");
-        $sheet->setCellValue("I$row", "=SUM(I$str:I$edr)");
-        $sheet->setCellValue("J$row", "=SUM(J$str:J$edr)");
-        $sheet->setCellValue("Q$row", "=SUM(Q$str:Q$edr)");
-        $sheet->getStyle("H$str:J$row")->applyFromArray($idrFormat);
-        $sheet->getStyle("M$str:Q$row")->applyFromArray($idrFormat);
         if ($JnsLaporan == 1) {
-            $sheet->getStyle("A$row:J$row")->applyFromArray(array_merge($allBorders));
+            $sheet->setCellValue("H$row", "=SUM(H$str:H$edr)");
+            $sheet->setCellValue("I$row", "=SUM(I$str:I$edr)");
+            $sheet->setCellValue("J$row", "=SUM(J$str:J$edr)");
+            $sheet->setCellValue("K$row", "=SUM(K$str:K$edr)");
+            $sheet->setCellValue("L$row", "=SUM(L$str:L$edr)");
         }else{
-            $sheet->getStyle("A$row:Q$row")->applyFromArray(array_merge($allBorders));
+            $sheet->setCellValue("L$row", "=SUM(L$str:L$edr)");
         }
+        $sheet->getStyle("H$str:L$row")->applyFromArray($idrFormat);
+        $sheet->getStyle("A$row:L$row")->applyFromArray(array_merge($allBorders));
         $row++;
     }
 }else{
@@ -147,7 +150,7 @@ if ($JnsLaporan < 3) {
             $row++;
             $nmr++;
             $sheet->setCellValue("A$row", $nmr);
-            $sheet->setCellValue("B$row", $rpt['item_code']);
+            $sheet->setCellValueExplicit("B$row", $rpt['item_code'],PHPExcel_Cell_DataType::TYPE_STRING);
             $sheet->setCellValue("C$row", $rpt['item_descs']);
             $sheet->setCellValue("D$row", $rpt['satuan']);
             $sheet->setCellValue("E$row", $rpt['sum_qty']);

@@ -42,21 +42,16 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
         <tr>
             <td>
                 <select name="CabangId" class="text2" id="CabangId" required>
-                <?php if($userLevel > 3){ ?>
                     <option value="0">- Semua Cabang -</option>
                     <?php
-                    foreach ($cabangs as $cab) {
-                        if ($cab->Id == $CabangId) {
-                            printf('<option value="%d" selected="selected">%s - %s</option>', $cab->Id, $cab->Kode, $cab->Cabang);
+                    while ($rs = $mixcabangs->FetchAssoc()) {
+                        if ($rs["id"] == $CabangId) {
+                            printf('<option value="%d" selected="selected">%s</option>', $rs["id"], $rs["nama_outlet"]);
                         } else {
-                            printf('<option value="%d">%s - %s</option>', $cab->Id, $cab->Kode, $cab->Cabang);
+                            printf('<option value="%d">%s</option>', $rs["id"], $rs["nama_outlet"]);
                         }
                     }
                     ?>
-                <?php }else{
-                        printf('<option value="%d">%s - %s</option>', $userCabId, $userCabCode, $userCabName);
-                }?>
-                </select>
             </td>
             <td>
                 <select id="ContactsId" name="ContactsId" style="width: 150px" required>
@@ -77,7 +72,6 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
             <td>
                 <select id="Output" name="Output" required>
                     <option value="0" <?php print($Output == 0 ? 'selected="selected"' : '');?>>0 - Web Html</option>
-                    <option value="1" <?php print($Output == 1 ? 'selected="selected"' : '');?>>1 - Excel</option>
                 </select>
             </td>
             <td>

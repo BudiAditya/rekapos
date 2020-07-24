@@ -445,6 +445,10 @@ class ApReturnController extends AppController {
         $this->Set("userCabName",$cabName);
         $this->Set("userLevel",$this->userLevel);
         $this->Set("JnsLaporan",$sJnsLaporan);
+        //load mix cabangs
+        $loader = new Cabang();
+        $mixcabangs = $loader->LoadMixCabang($this->userCompanyId);
+        $this->Set("mixcabangs", $mixcabangs);
     }
 
     public function createTextApReturn($id){

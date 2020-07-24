@@ -50,21 +50,17 @@
         </tr>
         <tr>
             <td>
-                <select name="CabangId" class="text2" id="CabangId" required>
-                    <?php if($userLevel > 3){ ?>
-                        <option value="0">- Semua Cabang -</option>
-                        <?php
-                        foreach ($cabangs as $cab) {
-                            if ($cab->Id == $CabangId) {
-                                printf('<option value="%d" selected="selected">%s - %s</option>', $cab->Id, $cab->Kode, $cab->Cabang);
-                            } else {
-                                printf('<option value="%d">%s - %s</option>', $cab->Id, $cab->Kode, $cab->Cabang);
-                            }
+                <select name="CabangId" class="text2" id="CabangId" style="width: 150px" required>
+                    <option value="0">-- Semua Cabang --</option>
+                    <?php
+                    while ($rs = $mixcabangs->FetchAssoc()) {
+                        if ($rs["id"] == $CabangId) {
+                            printf('<option value="%d" selected="selected">%s</option>', $rs["id"], $rs["nama_outlet"]);
+                        } else {
+                            printf('<option value="%d">%s</option>', $rs["id"], $rs["nama_outlet"]);
                         }
-                        ?>
-                    <?php }else{
-                        printf('<option value="%d">%s - %s</option>', $userCabId, $userCabCode, $userCabName);
-                    }?>
+                    }
+                    ?>
                 </select>
             </td>            
             <td>
@@ -122,15 +118,18 @@
             <th>Tanggal</th>
             <th>No. GRN</th>
             <th>Nama Supplier</th>
-            <th>Keterangan</th>
-            <th>JTP</th>
-            <th>Jumlah</th>
-            <th>Diskon</th>
-            <th>Retur</th>
-            <th>Terbayar</th>
-            <th>Outstanding</th>
             <?php
-            if ($JnsLaporan == 2){
+            if ($JnsLaporan == 1) {
+                print('
+                    <th>Keterangan</th>
+                    <th>JTP</th>
+                    <th>Jumlah</th>
+                    <th>Diskon</th>
+                    <th>Retur</th>
+                    <th>Terbayar</th>
+                    <th>Outstanding</th>
+                    ');
+            }else{
                 print("<th nowrap='nowrap'>Kode Barang</th>");
                 print("<th nowrap='nowrap'>Nama Barang</th>");
                 print("<th>QTY</th>");
@@ -170,14 +169,14 @@
                 printf("<td nowrap='nowrap'>%s</td>", date('d-m-Y', strtotime($row["grn_date"])));
                 printf("<td nowrap='nowrap'><a href= '%s' target='_blank'>%s</a></td>", $url, $row["grn_no"]);
                 printf("<td nowrap='nowrap'>%s</td>", $row["supplier_name"]);
-                printf("<td nowrap='nowrap'>%s</td>", $row["grn_descs"]);
-                printf("<td nowrap='nowrap'>%s</td>", date('d-m-Y', strtotime($row["due_date"])));
-                printf("<td align='right'>%s</td>", number_format($row["base_amount"], 0));
-                printf("<td align='right'>%s</td>", number_format($row["disc1_amount"], 0));
-                printf("<td align='right'>%s</td>", number_format($row["return_amount"], 0));
-                printf("<td align='right'>%s</td>", number_format($row["paid_amount"], 0));
-                printf("<td align='right'>%s</td>", number_format($row["balance_amount"], 0));
                 if ($JnsLaporan == 1){
+                    printf("<td nowrap='nowrap'>%s</td>", $row["grn_descs"]);
+                    printf("<td nowrap='nowrap'>%s</td>", date('d-m-Y', strtotime($row["due_date"])));
+                    printf("<td align='right'>%s</td>", number_format($row["base_amount"], 0));
+                    printf("<td align='right'>%s</td>", number_format($row["disc1_amount"], 0));
+                    printf("<td align='right'>%s</td>", number_format($row["return_amount"], 0));
+                    printf("<td align='right'>%s</td>", number_format($row["paid_amount"], 0));
+                    printf("<td align='right'>%s</td>", number_format($row["balance_amount"], 0));
                     print("</tr>");
                 }
                 $tTotal += $row["base_amount"];
@@ -189,7 +188,7 @@
             if ($JnsLaporan == 2){
                 if ($sma) {
                     print("</tr>");
-                    print("<td colspan='11'>&nbsp;</td>");
+                    print("<td colspan='5'>&nbsp;</td>");
                 }
                 printf("<td nowrap='nowrap'>%s</td>",$row['item_code']);
                 printf("<td nowrap='nowrap'>%s</td>",$row['item_descs']);
@@ -208,13 +207,14 @@
         }
         print("<tr>");
         print("<td colspan='7' align='right'>Total Invoice</td>");
-        printf("<td align='right'>%s</td>",number_format($tTotal,0));
-        printf("<td align='right'>%s</td>",number_format($tDiskon,0));
-        printf("<td align='right'>%s</td>",number_format($tReturn,0));
-        printf("<td align='right'>%s</td>",number_format($tTerbayar,0));
-        printf("<td align='right'>%s</td>",number_format($tSisa,0));
-        if ($JnsLaporan == 2){
-            print("<td colspan='6'>&nbsp;</td>");
+        if ($JnsLaporan == 1) {
+            printf("<td align='right'>%s</td>", number_format($tTotal, 0));
+            printf("<td align='right'>%s</td>", number_format($tDiskon, 0));
+            printf("<td align='right'>%s</td>", number_format($tReturn, 0));
+            printf("<td align='right'>%s</td>", number_format($tTerbayar, 0));
+            printf("<td align='right'>%s</td>", number_format($tSisa, 0));
+        }else{
+            print("<td colspan='4'>&nbsp;</td>");
             printf("<td align='right'>%s</td>",number_format($tdpp,0));
             printf("<td align='right'>%s</td>",number_format($tppn,0));
             printf("<td align='right'>%s</td>",number_format($tdpp+$tppn,0));

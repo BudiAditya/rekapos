@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html xmlns="http://www.w3.org/1999/html">
+<html>
 <?php $userName = AclManager::GetInstance()->GetCurrentUser()->RealName; ?>
 <head>
 	<title>REKASYS - Rekapitulasi Nota/Invoice/Piutang</title>
@@ -38,8 +38,16 @@
         <tr>
             <td>
                 <select name="CabangId" class="text2" id="CabangId" required style="width:200px">
+                    <option value="0">--Semua Cabang--</option>
                 <?php
-                    printf('<option value="%d">%s - %s</option>', $userCabId, $userCabCode, $userCabName);
+                    //printf('<option value="%d">%s - %s</option>', $userCabId, $userCabCode, $userCabName);
+                    while ($rs = $mixcabangs->FetchAssoc()){
+                        if ($rs["id"] == $CabangId) {
+                            printf('<option value="%d" selected="selected">%s</option>', $rs["id"], $rs["nama_outlet"]);
+                        }else{
+                            printf('<option value="%d">%s</option>',$rs["id"],$rs["nama_outlet"]);
+                        }
+                    }
                 ?>
                 </select>
             </td>
@@ -84,14 +92,17 @@
                 <th>Cabang</th>
                 <th>Tanggal</th>
                 <th>No. Trx</th>
-                <th>Customer</th>
                 <th>Kasir</th>
-                <th>Tunai</th>
-                <th>Kartu Kredit</th>
-                <th>Kartu Debit</th>
-                <th>Jumlah</th>
                 <?php
-                if ($JnsLaporan == 2){
+                if ($JnsLaporan == 1) {
+                    print("
+                        <th>Customer</th>
+                        <th>Tunai</th>
+                        <th>Kartu Kredit</th>
+                        <th>Kartu Debit</th>
+                        <th>Jumlah</th>
+                    ");
+                }else{
                     print("<th nowrap='nowrap'>Kode Barang</th>");
                     print("<th nowrap='nowrap'>Nama Barang</th>");
                     print("<th>QTY</th>");
@@ -124,15 +135,15 @@
                         print("<tr valign='Top'>");
                         printf("<td>%s</td>", $nmr);
                         printf("<td nowrap='nowrap'>%s</td>", $row["cabang_code"]);
-                        printf("<td>%s</td>", date('d-m-Y', strtotime($row["tanggal"])));
+                        printf("<td nowrap='nowrap'>%s</td>", date('d-m-Y', strtotime($row["tanggal"])));
                         printf("<td><a href= '%s' target='_blank'>%s</a></td>", $url, $row["trx_no"]);
-                        printf("<td nowrap='nowrap'>%s</td>", $row["cust_name"]);
                         printf("<td nowrap='nowrap'>%s</td>", $row["kasir"]);
-                        printf("<td align='right'>%s</td>", number_format($row["bayar_tunai"], 0));
-                        printf("<td align='right'>%s</td>", number_format($row["bayar_kk"], 0));
-                        printf("<td align='right'>%s</td>", number_format($row["bayar_kd"], 0));
-                        printf("<td align='right'>%s</td>", number_format($row["total_transaksi"], 0));
                         if ($JnsLaporan == 1){
+                            printf("<td nowrap='nowrap'>%s</td>", $row["cust_name"]);
+                            printf("<td align='right'>%s</td>", number_format($row["bayar_tunai"], 0));
+                            printf("<td align='right'>%s</td>", number_format($row["bayar_kk"], 0));
+                            printf("<td align='right'>%s</td>", number_format($row["bayar_kd"], 0));
+                            printf("<td align='right'>%s</td>", number_format($row["total_transaksi"], 0));
                             print("</tr>");
                         }
                         $tunai+= $row["bayar_tunai"];
@@ -143,7 +154,7 @@
                     if ($JnsLaporan == 2){
                         if ($sma) {
                             print("</tr>");
-                            print("<td colspan='10'>&nbsp;</td>");
+                            print("<td colspan='5'>&nbsp;</td>");
                         }
                         printf("<td nowrap='nowrap'>%s</td>", $row['item_code']);
                         printf("<td nowrap='nowrap'>%s</td>", $row['item_descs']);
@@ -158,13 +169,14 @@
                     $ivn = $row["trx_no"];
                 }
             print("<tr>");
-            print("<td colspan='6' align='right'>Total Transaksi</td>");
-            printf("<td align='right'>%s</td>",number_format($tunai,0));
-            printf("<td align='right'>%s</td>",number_format($kk,0));
-            printf("<td align='right'>%s</td>",number_format($kd,0));
-            printf("<td align='right'>%s</td>",number_format($total,0));
-            if ($JnsLaporan == 2) {
-                print("<td colspan='6'>&nbsp;</td>");
+            if ($JnsLaporan == 1) {
+                print("<td colspan='6' align='right'>Total Transaksi</td>");
+                printf("<td align='right'>%s</td>", number_format($tunai, 0));
+                printf("<td align='right'>%s</td>", number_format($kk, 0));
+                printf("<td align='right'>%s</td>", number_format($kd, 0));
+                printf("<td align='right'>%s</td>", number_format($total, 0));
+            }else{
+                print("<td colspan='11' align='right'>Total Transaksi</td>");
                 printf("<td align='right'>%s</td>", number_format($subtotal, 0));
             }
             print("</tr>");

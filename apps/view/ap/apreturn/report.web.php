@@ -49,20 +49,16 @@
         <tr>
             <td>
                 <select name="CabangId" class="text2" id="CabangId" required>
-                <?php if($userLevel > 3){ ?>
-                    <option value="0">- Semua Cabang -</option>
+                    <option value="0">-- Semua Cabang --</option>
                     <?php
-                    foreach ($cabangs as $cab) {
-                        if ($cab->Id == $CabangId) {
-                            printf('<option value="%d" selected="selected">%s</option>', $cab->Id, $cab->Kode);
+                    while ($rs = $mixcabangs->FetchAssoc()) {
+                        if ($rs["id"] == $CabangId) {
+                            printf('<option value="%d" selected="selected">%s</option>', $rs["id"], $rs["nama_outlet"]);
                         } else {
-                            printf('<option value="%d">%s</option>', $cab->Id, $cab->Kode);
+                            printf('<option value="%d">%s</option>', $rs["id"], $rs["nama_outlet"]);
                         }
                     }
                     ?>
-                <?php }else{
-                        printf('<option value="%d">%s - %s</option>', $userCabId, $userCabCode, $userCabName);
-                }?>
                 </select>
             </td>
             <td>

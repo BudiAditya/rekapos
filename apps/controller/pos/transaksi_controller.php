@@ -205,6 +205,10 @@ class TransaksiController extends AppController {
         $this->Set("userCabCode",$cabCode);
         $this->Set("userCabName",$cabName);
         $this->Set("userLevel",$this->userLevel);
+        //load cabang mix
+        $loader = new Cabang();
+        $mixcabangs = $loader->LoadMixCabang($this->userCompanyId);
+        $this->Set("mixcabangs", $mixcabangs);
     }
 
     public function view ($id = 0){
