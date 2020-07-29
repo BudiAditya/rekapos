@@ -19,12 +19,12 @@ $menu = $root->AddNode("PENJUALAN", null, "menu");
         $menu->AddNode("Admin Kartu Bank", "master.admkartubank");
     $menu->AddNode("Transaksi Penjualan", null, "title");
         $menu->AddNode("Daftar Penjualan", "pos.transaksi");
-        $menu->AddNode("Retur Penjualan", "pos.retur");
+        $menu->AddNode("Retur Penjualan", "pos.posretur");
         $menu->AddNode("Sesi Kasir", "pos.sesikasir");
     $menu->AddNode("Laporan Penjualan", null, "title");
         //$menu->AddNode("Statistik Penjualan", "pos.statistik");
         $menu->AddNode("Rekapitulasi Penjualan", "pos.transaksi/report");
-        //$menu->AddNode("Daftar Retur", "pos.retur/report");
+        //$menu->AddNode("Daftar Retur", "pos.posretur/report");
         //$menu->AddNode("Profit Penjualan", "pos.transaksi/profit");
         //$menu->AddNode("Laporan Mutasi Penjualan", "ar.mutasi");
 /* -- tidak dipakai --

@@ -16,7 +16,7 @@ class Mutasi extends EntityBase {
                 `supplier`  varchar(100) NULL ,
                 `keterangan`  varchar(100) NULL ,
                 `grn`  bigint(11) NULL DEFAULT 0 ,
-                `retur`  bigint(11) NULL DEFAULT 0 ,
+                `posretur`  bigint(11) NULL DEFAULT 0 ,
                 `payment`  bigint(11) NULL DEFAULT 0 ,
                 `saldo`  bigint(11) NULL DEFAULT 0)';
         $this->connector->CommandText = $sqx;
@@ -29,7 +29,7 @@ class Mutasi extends EntityBase {
                 `supplier`  varchar(100) NULL ,
                 `keterangan`  varchar(100) NULL ,
                 `grn`  bigint(11) NULL DEFAULT 0 ,
-                `retur`  bigint(11) NULL DEFAULT 0 ,
+                `posretur`  bigint(11) NULL DEFAULT 0 ,
                 `payment`  bigint(11) NULL DEFAULT 0 ,
                 `saldo`  bigint(11) NULL DEFAULT 0)';
         $this->connector->CommandText = $sqx;
@@ -46,7 +46,7 @@ class Mutasi extends EntityBase {
         $this->connector->CommandText = $sqx;
         $rs = $this->connector->ExecuteNonQuery();
         //get return lalu
-        $sqx = "Insert Into tmp_prev (idx,trx_date,retur)";
+        $sqx = "Insert Into tmp_prev (idx,trx_date,posretur)";
         $sqx.= " Select 0,'" . $stDate ."', coalesce(sum(a.rb_amount),0) as sum_return From vw_ap_return_master_mix a Where a.rb_date < '" . $stDate ."' And a.rb_status < 3";
         if ($supplierId > 0){
             $sqx.= " And a.supplier_id = ".$supplierId;
@@ -69,7 +69,7 @@ class Mutasi extends EntityBase {
         $rs = $this->connector->ExecuteNonQuery();
         //jadikan saldo awal
         $sqx = "Insert Into tmp_mutasi (idx,trx_date,supplier,saldo)";
-        $sqx.= " Select 0,'" . $stDate ."','Saldo sebelumnya..',coalesce(sum(a.grn - (a.retur + a.payment)),0) as sum_saldo From tmp_prev a Group By a.trx_date";
+        $sqx.= " Select 0,'" . $stDate ."','Saldo sebelumnya..',coalesce(sum(a.grn - (a.posretur + a.payment)),0) as sum_saldo From tmp_prev a Group By a.trx_date";
         $this->connector->CommandText = $sqx;
         $rs = $this->connector->ExecuteNonQuery();
         //get grn bulan diminta
@@ -84,7 +84,7 @@ class Mutasi extends EntityBase {
         $this->connector->CommandText = $sqx;
         $rs = $this->connector->ExecuteNonQuery();
         //get return bulan diminta
-        $sqx = "Insert Into tmp_mutasi (idx,trx_date,no_bukti,supplier,retur)";
+        $sqx = "Insert Into tmp_mutasi (idx,trx_date,no_bukti,supplier,posretur)";
         $sqx.= " Select 2,a.rb_date,a.rb_no,a.supplier_name,a.rb_amount From vw_ap_return_master_mix a Where (a.rb_date >= '". $stDate . "' And a.rb_date <= '". $enDate ."') And a.rb_status < 3";
         if ($supplierId > 0){
             $sqx.= " And a.supplier_id = ".$supplierId;

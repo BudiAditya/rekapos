@@ -1,8 +1,7 @@
 <!DOCTYPE HTML>
 <html xmlns="http://www.w3.org/1999/html">
-<?php /** @var $suppliers Contacts[] */ ?>
 <head>
-	<title>REKASYS - Rekapitulasi Retur Pembelian</title>
+	<title>REKASYS - Rekapitulasi Retur Penjualan Tunai</title>
 	<meta http-equiv="Content-type" content="text/html;charset=UTF-8"/>
 	<link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/common.css")); ?>"/>
 	<link rel="stylesheet" type="text/css" href="<?php print($helper->path("public/css/jquery-ui.css")); ?>"/>
@@ -28,7 +27,7 @@
 <form id="frm" name="frmReport" method="post">
     <table cellpadding="2" cellspacing="1" class="tablePadding tableBorder">
         <tr class="center">
-            <th colspan="4"><b>Rekapitulasi Retur Pembelian</b></th>
+            <th colspan="3"><b>Rekapitulasi Retur Penjualan Tunai</b></th>
             <th>Jenis Laporan:</th>
             <th colspan="2"><select name="JnsLaporan" id="JnsLaporan">
                     <option value="1" <?php print($JnsLaporan == 1 ? 'selected="selected"' : '');?>>1 - Rekap Per Bukti</option>
@@ -39,7 +38,6 @@
         </tr>
         <tr class="center">
             <th>Cabang</th>
-            <th>Supplier</th>
             <th>Kondisi</th>
             <th>Dari Tanggal</th>
             <th>Sampai Tanggal</th>
@@ -62,20 +60,6 @@
                 </select>
             </td>
             <td>
-                <select id="ContactsId" name="ContactsId" style="width: 150px" required>
-                    <option value="0">- Semua Supplier -</option>
-                    <?php
-                    foreach ($suppliers as $customer) {
-                        if ($ContactsId == $customer->Id){
-                            printf('<option value="%d" selected="selected">%s (%s)</option>',$customer->Id,$customer->ContactCode,$customer->ContactName);
-                        }else{
-                            printf('<option value="%d">%s (%s)</option>',$customer->Id,$customer->ContactCode,$customer->ContactName);
-                        }
-                    }
-                    ?>
-                </select>
-            </td>
-            <td>
                 <select id="Kondisi" name="Kondisi" required>
                     <option value="0" <?php print($Kondisi == 0 ? 'selected="selected"' : '');?>>0 - Semua Kondisi -</option>
                     <option value="1" <?php print($Kondisi == 1 ? 'selected="selected"' : '');?>>1 - Bagus</option>
@@ -91,7 +75,7 @@
                     <option value="1" <?php print($Output == 1 ? 'selected="selected"' : '');?>>1 - Excel</option>
                 </select>
             </td>
-            <td><button type="submit" formaction="<?php print($helper->site_url("ap.apreturn/report")); ?>"><b>Proses</b></button></td>
+            <td><button type="submit" formaction="<?php print($helper->site_url("pos.posretur/report")); ?>"><b>Proses</b></button></td>
         </tr>
     </table>
 </form>
@@ -99,7 +83,7 @@
 <?php  if ($Reports != null){
 if ($JnsLaporan < 3){
     ?>
-    <h3>Rekapitulasi Retur Pembelian</h3>
+    <h3>Rekapitulasi Retur Penjualan Tunai</h3>
     <?php printf("Dari Tgl. %s - %s",date('d-m-Y',$StartDate),date('d-m-Y',$EndDate));?>
     <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
         <tr>
@@ -107,7 +91,6 @@ if ($JnsLaporan < 3){
             <th>Cabang</th>
             <th>Tanggal</th>
             <th>No. Bukti</th>
-            <th>Nama Supplier</th>
             <th>Keterangan</th>
             <th>Nilai Retur</th>
             <?php
@@ -118,8 +101,6 @@ if ($JnsLaporan < 3){
                 print("<th>Kondisi</th>");
                 print("<th>QTY</th>");
                 print("<th>Harga</th>");
-                print("<th>DPP</th>");
-                print("<th>PPN</th>");
                 print("<th>Jumlah</th>");
             }
             ?>
@@ -133,7 +114,7 @@ if ($JnsLaporan < 3){
             $ivn = null;
             $kds = null;
             while ($row = $Reports->FetchAssoc()) {
-                if ($ivn <> $row["rb_no"]) {
+                if ($ivn <> $row["rtn_no"]) {
                     $nmr++;
                     $sma = false;
                 } else {
@@ -144,16 +125,15 @@ if ($JnsLaporan < 3){
                     print("<tr valign='Top'>");
                     printf("<td>%s</td>", $nmr);
                     printf("<td nowrap='nowrap'>%s</td>", $row["cabang_code"]);
-                    printf("<td nowrap='nowrap'>%s</td>", date('d-m-Y', strtotime($row["rb_date"])));
-                    printf("<td nowrap='nowrap'><a href= '%s' target='_blank'>%s</a></td>", $url, $row["rb_no"]);
-                    printf("<td nowrap='nowrap'>%s</td>", $row["supplier_name"]);
-                    printf("<td nowrap='nowrap'>%s</td>", $row["rb_descs"]);
-                    printf("<td align='right'>%s</td>", number_format($row["rb_amount"], 0));
+                    printf("<td nowrap='nowrap'>%s</td>", date('d-m-Y', strtotime($row["rtn_date"])));
+                    printf("<td nowrap='nowrap'><a href= '%s' target='_blank'>%s</a></td>", $url, $row["rtn_no"]);
+                    printf("<td nowrap='nowrap'>%s</td>", $row["rtn_descs"]);
+                    printf("<td align='right'>%s</td>", number_format($row["rtn_amount"], 0));
                     if ($JnsLaporan == 1) {
                         print("</tr>");
                     };
                     $nmr++;
-                    $total += $row["rb_amount"];
+                    $total += $row["rtn_amount"];
                 }
                 if ($JnsLaporan == 2) {
                     if ($sma) {
@@ -167,34 +147,32 @@ if ($JnsLaporan < 3){
                     }elseif ($row['kondisi'] == 3) {
                         $kds = "Expire";
                     }else{
-                        $kds = "N/A";
+                        $kds = "Bagus";
                     }
-                    printf("<td nowrap='nowrap'>%s</td>", $row['ex_grn_no']);
+                    printf("<td nowrap='nowrap'>%s</td>", $row['ex_trx_no']);
                     printf("<td nowrap='nowrap'>%s</td>", $row['item_code']);
                     printf("<td nowrap='nowrap'>%s</td>", $row['item_descs']);
                     printf("<td nowrap='nowrap'>%s</td>", $kds);
                     printf("<td align='right'>%s</td>", number_format($row['qty_retur'], 0));
                     printf("<td align='right' >%s</td>", number_format($row['price'], 0));
                     printf("<td align='right'>%s</td>", number_format($row['sub_total'], 0));
-                    printf("<td align='right'>%s</td>", number_format($row['tax_amount'], 0));
-                    printf("<td align='right'>%s</td>", number_format($row['sub_total']+$row['tax_amount'], 0));
                     print("</tr>");
-                    $subtotal += $row['sub_total']+$row['tax_amount'];
+                    $subtotal += $row['sub_total'];
                 }
-                $ivn = $row["rb_no"];
+                $ivn = $row["rtn_no"];
             }
         print("<tr>");
-        print("<td colspan='6' align='right'>Total Retur</td>");
+        print("<td colspan='5' align='right'>Total Retur</td>");
         printf("<td align='right'>%s</td>",number_format($total,0));
         if ($JnsLaporan == 2) {
-            print("<td colspan='8'>&nbsp;</td>");
+            print("<td colspan='6'>&nbsp;</td>");
             printf("<td align='right'>%s</td>", number_format($subtotal, 0));
         }
         print("</tr>");
         ?>
     </table>
 <?php }else{ ?>
-    <h3>Rekapitulasi Item Retur Pembelian</h3>
+    <h3>Rekapitulasi Item Retur Penjualan Tunai</h3>
     <?php printf("Dari Tgl. %s - %s",date('d-m-Y',$StartDate),date('d-m-Y',$EndDate));?>
     <table cellpadding="1" cellspacing="1" class="tablePadding tableBorder">
         <tr>
@@ -218,7 +196,7 @@ if ($JnsLaporan < 3){
             print("<tr valign='Top'>");
             printf("<td>%s</td>", $nmr);
             printf("<td>%s</td>",$row['item_code']);
-            printf("<td>%s</td>",$row['item_descs']);
+            printf("<td>%s</td>",$row['item_name']);
             printf("<td>%s</td>",$row['satuan']);
             printf("<td align='right'>%s</td>",number_format($row['qty_bagus'],0));
             printf("<td align='right'>%s</td>",number_format($row['qty_rusak'],0));

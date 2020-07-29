@@ -113,7 +113,7 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                     if ($nmr == 1){
                         $saldo = $row["saldo"];
                     }else{
-                        $saldo = $saldo + ($row["invoice"] - ($row["retur"] + $row["receipt"]));
+                        $saldo = $saldo + ($row["invoice"] - ($row["posretur"] + $row["receipt"]));
                     }
                     print("<tr valign='Midle'>");
                     printf("<td>%s</td>", $nmr++);
@@ -121,13 +121,13 @@ $userName = AclManager::GetInstance()->GetCurrentUser()->RealName;
                     printf("<td nowrap='nowrap'>%s</td>", $row["no_bukti"]);
                     printf("<td nowrap='nowrap'>%s</td>", $row["customer"]);
                     printf("<td align='right'>%s</td>", number_format($row["invoice"], 0));
-                    printf("<td align='right'>%s</td>", number_format($row["retur"], 0));
+                    printf("<td align='right'>%s</td>", number_format($row["posretur"], 0));
                     printf("<td align='right'>%s</td>", number_format($row["receipt"], 0));
                     printf("<td align='right'>%s</td>", number_format($saldo, 0));
                     print("</tr>");
                     $invoice+= $row["invoice"];
                     $receipt+= $row["receipt"];
-                    $retur+= $row["retur"];
+                    $retur+= $row["posretur"];
                 }
                 print("<tr class='bold'>");
                 print("<td colspan='4'>T o t a l </td>");

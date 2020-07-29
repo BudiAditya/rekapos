@@ -116,6 +116,77 @@ class SesiKasirController extends AppController {
         }
         $this->Set("master",$master);
     }
+
+    public function report(){
+        // report rekonsil process
+        require_once(MODEL . "master/company.php");
+        require_once(MODEL . "master/cabang.php");
+        require_once(MODEL . "master/user_admin.php");
+        // Intelligent time detection...
+        $month = (int)date("n");
+        $year = (int)date("Y");
+        $loader = null;
+        if (count($this->postData) > 0) {
+            // proses rekap disini
+            $sCabangId = $this->GetPostValue("CabangId");
+            $sKasirId = $this->GetPostValue("KasirId");
+            $sStartDate = strtotime($this->GetPostValue("StartDate"));
+            $sEndDate = strtotime($this->GetPostValue("EndDate"));
+            $sOutput = $this->GetPostValue("Output");
+            $sJnsLaporan = $this->GetPostValue("JnsLaporan");
+            // ambil data yang diperlukan
+            $sesi = new SesiKasir();
+            if ($sJnsLaporan == 1) {
+                $reports = $sesi->Load4Reports($sCabangId, $sKasirId, $sStartDate, $sEndDate);
+            }elseif ($sJnsLaporan == 2){
+                $reports = $sesi->Load4DetailReports($sCabangId, $sKasirId, $sStartDate, $sEndDate);
+            }else{
+                $reports = $sesi->Load4ItemReports($sCabangId, $sKasirId, $sStartDate, $sEndDate);
+            }
+        }else{
+            $sCabangId = 0;
+            $sKasirId = 0;
+            $sStartDate = mktime(0, 0, 0, $month, 1, $year);
+            $sEndDate = time();
+            $sJnsLaporan = 1;
+            $sOutput = 0;
+            $reports = null;
+        }
+        $loader = new Company($this->userCompanyId);
+        $this->Set("company_name", $loader->CompanyName);
+        //load data cabang
+        $loader = new Cabang();
+        $cabCode = null;
+        $cabName = null;
+        if ($this->userLevel > 3){
+            $cabang = $loader->LoadByEntityId($this->userCompanyId);
+        }else{
+            $cabang = $loader->LoadById($this->userCabangId);
+            $cabCode = $cabang->Kode;
+            $cabName = $cabang->Cabang;
+        }
+        // kirim ke view
+        $this->Set("cabangs", $cabang);
+        $this->Set("CabangId",$sCabangId);
+        $this->Set("StartDate",$sStartDate);
+        $this->Set("EndDate",$sEndDate);
+        $this->Set("KasirId",$sKasirId);
+        $this->Set("Output",$sOutput);
+        $this->Set("Reports",$reports);
+        $this->Set("userCabId",$this->userCabangId);
+        $this->Set("userCabCode",$cabCode);
+        $this->Set("userCabName",$cabName);
+        $this->Set("userLevel",$this->userLevel);
+        $this->Set("JnsLaporan",$sJnsLaporan);
+        //load mix cabangs
+        $loader = new Cabang();
+        $mixcabangs = $loader->LoadMixCabang($this->userCompanyId);
+        $this->Set("mixcabangs", $mixcabangs);
+        //load mix cabangs
+        $loader = new UserAdmin();
+        $kasirs = $loader->LoadKasirAll();
+        $this->Set("kasirs", $kasirs);
+    }
 }
 
 

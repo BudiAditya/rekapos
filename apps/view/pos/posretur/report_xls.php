@@ -2,14 +2,14 @@
 $phpExcel = new PHPExcel();
 $headers = array(
     'Content-Type: application/vnd.ms-excel'
-, 'Content-Disposition: attachment;filename="print-rekap-ap-return.xls"'
+, 'Content-Disposition: attachment;filename="rekap-pos-return.xls"'
 , 'Cache-Control: max-age=0'
 );
 $writer = new PHPExcel_Writer_Excel5($phpExcel);
 // Excel MetaData
 $phpExcel->getProperties()->setCreator("Rekasystem Infotama Inc (c) Budi Aditya")->setTitle("Print Laporan")->setCompany("Rekasystem Infotama Inc");
 $sheet = $phpExcel->getActiveSheet();
-$sheet->setTitle("Rekapitulasi Retur Pembelian");
+$sheet->setTitle("Retur Penjualan Tunai");
 //helper for styling
 $center = array("alignment" => array("horizontal" => PHPExcel_Style_Alignment::HORIZONTAL_CENTER));
 $right = array("alignment" => array("horizontal" => PHPExcel_Style_Alignment::HORIZONTAL_RIGHT));
@@ -36,7 +36,7 @@ $sheet->getStyle("A1");
 $sheet->setShowGridlines(false);
 $row++;
 if ($JnsLaporan < 3) {
-    $sheet->setCellValue("A$row","REKAPITULASI RETUR PEMBELIAN");
+    $sheet->setCellValue("A$row","REKAPITULASI RETUR PENJUALAN TUNAI");
     $row++;
     $sheet->setCellValue("A$row","Dari Tgl. ".date('d-m-Y',$StartDate)." - ".date('d-m-Y',$EndDate));
     $row++;
@@ -44,19 +44,18 @@ if ($JnsLaporan < 3) {
     $sheet->setCellValue("B$row","Cabang");
     $sheet->setCellValue("C$row","Tanggal");
     $sheet->setCellValue("D$row","No. Bukti");
-    $sheet->setCellValue("E$row","Nama Supplier");
-    $sheet->setCellValue("F$row","Keterangan");
-    $sheet->setCellValue("G$row","Nilai Retur");
+    $sheet->setCellValue("E$row","Keterangan");
+    $sheet->setCellValue("F$row","Nilai Retur");
     if ($JnsLaporan == 2) {
-        $sheet->setCellValue("H$row", 'Ex.Invoice');
-        $sheet->setCellValue("I$row", 'Kode Barang');
-        $sheet->setCellValue("J$row", 'Nama Barang');
-        $sheet->setCellValue("K$row", 'QTY');
-        $sheet->setCellValue("L$row", 'Harga');
-        $sheet->setCellValue("M$row", 'Jumlah');
-        $sheet->getStyle("A$row:M$row")->applyFromArray(array_merge($center, $allBorders));
+        $sheet->setCellValue("G$row", 'Ex.Trx');
+        $sheet->setCellValue("H$row", 'Kode Barang');
+        $sheet->setCellValue("I$row", 'Nama Barang');
+        $sheet->setCellValue("J$row", 'QTY');
+        $sheet->setCellValue("K$row", 'Harga');
+        $sheet->setCellValue("L$row", 'Jumlah');
+        $sheet->getStyle("A$row:L$row")->applyFromArray(array_merge($center, $allBorders));
     }else {
-        $sheet->getStyle("A$row:G$row")->applyFromArray(array_merge($center, $allBorders));
+        $sheet->getStyle("A$row:F$row")->applyFromArray(array_merge($center, $allBorders));
     }
     $nmr = 0;
     $str = $row;
@@ -65,7 +64,7 @@ if ($JnsLaporan < 3) {
         $ivn = null;
         while ($rpt = $Reports->FetchAssoc()) {
             $row++;
-            if ($ivn <> $rpt["rb_no"]) {
+            if ($ivn <> $rpt["rtn_no"]) {
                 $nmr++;
                 $sma = false;
             } else {
@@ -75,44 +74,43 @@ if ($JnsLaporan < 3) {
                 $sheet->setCellValue("A$row", $nmr);
                 $sheet->getStyle("A$row")->applyFromArray($center);
                 $sheet->setCellValue("B$row", $rpt["cabang_code"]);
-                $sheet->setCellValue("C$row", date('d-m-Y', strtotime($rpt["rb_date"])));
-                $sheet->setCellValue("D$row", $rpt["rb_no"]);
-                $sheet->setCellValue("E$row", $rpt["supplier_name"]);
-                $sheet->setCellValue("F$row", $rpt["rb_descs"]);
-                $sheet->setCellValue("G$row", $rpt["rb_amount"]);
-                $sheet->getStyle("A$row:G$row")->applyFromArray(array_merge($allBorders));
+                $sheet->setCellValue("C$row", date('d-m-Y', strtotime($rpt["rtn_date"])));
+                $sheet->setCellValue("D$row", $rpt["rtn_no"]);
+                $sheet->setCellValue("E$row", $rpt["rtn_descs"]);
+                $sheet->setCellValue("F$row", $rpt["rtn_amount"]);
+                $sheet->getStyle("A$row:F$row")->applyFromArray(array_merge($allBorders));
             }
             if ($JnsLaporan == 2) {
-                $sheet->setCellValue("H$row", $rpt['ex_grn_no']);
-                $sheet->setCellValueExplicit("I$row", $rpt['item_code'], PHPExcel_Cell_DataType::TYPE_STRING);
-                $sheet->setCellValue("J$row", $rpt['item_descs']);
-                $sheet->setCellValue("K$row", $rpt['qty_retur']);
-                $sheet->setCellValue("L$row", $rpt['price']);
-                $sheet->setCellValue("M$row", $rpt['sub_total']);
-                $sheet->getStyle("H$row:M$row")->applyFromArray(array_merge($allBorders));
+                $sheet->setCellValue("G$row", $rpt['ex_trx_no']);
+                $sheet->setCellValueExplicit("H$row", $rpt['item_code'], PHPExcel_Cell_DataType::TYPE_STRING);
+                $sheet->setCellValue("I$row", $rpt['item_descs']);
+                $sheet->setCellValue("J$row", $rpt['qty_retur']);
+                $sheet->setCellValue("K$row", $rpt['price']);
+                $sheet->setCellValue("L$row", $rpt['sub_total']);
+                $sheet->getStyle("G$row:L$row")->applyFromArray(array_merge($allBorders));
             }
-            $ivn = $rpt["rb_no"];
+            $ivn = $rpt["rtn_no"];
         }
         $edr = $row;
         $row++;
         $sheet->setCellValue("A$row", "TOTAL RETUR");
-        $sheet->mergeCells("A$row:F$row");
+        $sheet->mergeCells("A$row:E$row");
         $sheet->getStyle("A$row")->applyFromArray($center);
-        $sheet->setCellValue("G$row", "=SUM(G$str:G$edr)");
-        $sheet->getStyle("G$str:G$row")->applyFromArray($idrFormat);
+        $sheet->setCellValue("F$row", "=SUM(F$str:F$edr)");
+        $sheet->getStyle("F$str:F$row")->applyFromArray($idrFormat);
         if ($JnsLaporan == 2) {
-            $sheet->mergeCells("H$row:L$row");
-            $sheet->getStyle("A$row:M$row")->applyFromArray(array_merge($allBorders));
-            $sheet->setCellValue("M$row", "=SUM(M$str:M$edr)");
-            $sheet->getStyle("K$str:M$row")->applyFromArray($idrFormat);
+            $sheet->mergeCells("G$row:K$row");
+            $sheet->getStyle("A$row:L$row")->applyFromArray(array_merge($allBorders));
+            $sheet->setCellValue("L$row", "=SUM(L$str:L$edr)");
+            $sheet->getStyle("K$str:L$row")->applyFromArray($idrFormat);
         } else {
-            $sheet->getStyle("A$row:G$row")->applyFromArray(array_merge($allBorders));
+            $sheet->getStyle("A$row:F$row")->applyFromArray(array_merge($allBorders));
         }
         $row++;
     }
 }else{
         // rekap item yang terjual
-        $sheet->setCellValue("A$row", "REKAPITULASI ITEM RETUR PENJUALAN");
+        $sheet->setCellValue("A$row", "REKAPITULASI ITEM RETUR PENJUALAN TUNAI");
         $row++;
         $sheet->setCellValue("A$row", "Dari Tgl. " . date('d-m-Y', $StartDate) . " - " . date('d-m-Y', $EndDate));
         $row++;
@@ -133,7 +131,7 @@ if ($JnsLaporan < 3) {
                 $nmr++;
                 $sheet->setCellValue("A$row", $nmr);
                 $sheet->setCellValueExplicit("B$row", $rpt['item_code'],PHPExcel_Cell_DataType::TYPE_STRING);
-                $sheet->setCellValue("C$row", $rpt['item_descs']);
+                $sheet->setCellValue("C$row", $rpt['item_name']);
                 $sheet->setCellValue("D$row", $rpt['satuan']);
                 $sheet->setCellValue("E$row", $rpt['qty_bagus']);
                 $sheet->setCellValue("F$row", $rpt['qty_rusak']);

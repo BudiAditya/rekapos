@@ -97,6 +97,29 @@ ORDER BY $orderBy";
 		return $result;
 	}
 
+    public function LoadKasirAll($orderBy = "a.user_id", $includeDeleted = false) {
+        $this->connector->CommandText =
+                "SELECT a.*, b.entity_cd, b.company_name, b.start_date, c.short_desc,d.kode as kd_cabang,d.cabang as nm_cabang,d.area_id,e.dept_id,e.nama
+FROM sys_users AS a
+	JOIN sys_company AS b ON a.entity_id = b.entity_id
+	JOIN sys_status_code AS c ON a.status = c.code AND c.key = 'login_audit'
+	JOIN m_cabang As d ON a.entity_id = d.entity_id And a.cabang_id = d.id
+	LEFT JOIN m_karyawan e ON a.employee_id = e.id
+    WHERE a.is_kasir = 1
+ORDER BY $orderBy";
+        $rs = $this->connector->ExecuteQuery();
+        $result = array();
+        if ($rs != null) {
+            while ($row = $rs->FetchAssoc()) {
+                $temp = new UserAdmin();
+                $temp->FillProperties($row);
+                $result[] = $temp;
+            }
+        }
+
+        return $result;
+    }
+
 	public function FindByUserId($uid) {
 		$this->connector->CommandText =
 			"SELECT a.*, b.entity_cd, b.company_name, b.start_date,c.short_desc,d.kode as kd_cabang,d.cabang as nm_cabang,d.area_id,e.dept_id,e.nama

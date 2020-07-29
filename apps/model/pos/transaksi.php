@@ -181,7 +181,7 @@ class Transaksi extends EntityBase {
 				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 10 THEN a.sub_total ELSE 0 END), 0) October
 				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 11 THEN a.sub_total ELSE 0 END), 0) November
 				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 12 THEN a.sub_total ELSE 0 END), 0) December
-			    FROM vw_pos_master a Where year(a.tanggal) = $tahun And a.cabang_id = $cabId";
+			    FROM vw_pos_master_mix a Where year(a.tanggal) = $tahun And a.cabang_id = $cabId";
         $this->connector->CommandText = $query;
         $rs = $this->connector->ExecuteQuery();
         $row = $rs->FetchAssoc();
@@ -213,7 +213,7 @@ class Transaksi extends EntityBase {
 				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 10 THEN a.sub_total ELSE 0 END), 0) October
 				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 11 THEN a.sub_total ELSE 0 END), 0) November
 				,COALESCE(SUM(CASE WHEN month(a.tanggal) = 12 THEN a.sub_total ELSE 0 END), 0) December
-			    FROM vw_pos_master a Where year(a.tanggal) = $tahun And a.cabang_id = $cabId";
+			    FROM vw_pos_master_mix a Where year(a.tanggal) = $tahun And a.cabang_id = $cabId";
         $this->connector->CommandText = $query;
         $rs = $this->connector->ExecuteQuery();
         return $rs->FetchAssoc();

@@ -50,8 +50,8 @@ class TransaksiController extends AppController {
             $acl = AclManager::GetInstance();
             $settings["title"] = "Transaksi Penjualan";
             //if ($acl->CheckUserAccess("pos.transaksi", "edit")) {
-            //    $settings["actions"][] = array("Text" => "Retur", "Url" => "pos.transaksi/retur/%s", "Class" => "bt_edit", "ReqId" => 1,
-            //        "Error" => "Maaf anda harus memilih Data Penjualan terlebih dahulu sebelum proses retur.\nPERHATIAN: Pilih tepat 1 data penjualan",
+            //    $settings["actions"][] = array("Text" => "Retur", "Url" => "pos.transaksi/posretur/%s", "Class" => "bt_edit", "ReqId" => 1,
+            //        "Error" => "Maaf anda harus memilih Data Penjualan terlebih dahulu sebelum proses posretur.\nPERHATIAN: Pilih tepat 1 data penjualan",
             //        "Confirm" => "");
             //}
             //if ($acl->CheckUserAccess("pos.transaksi", "delete")) {

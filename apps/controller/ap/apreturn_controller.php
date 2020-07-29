@@ -74,10 +74,10 @@ class ApReturnController extends AppController {
                 $settings["actions"][] = array("Text" => "separator", "Url" => null);
                 $settings["actions"][] = array("Text" => "Approve Retur", "Url" => "ap.apreturn/approve", "Class" => "bt_approve", "ReqId" => 2,
                     "Error" => "Mohon memilih Data Retur terlebih dahulu sebelum proses approval.",
-                    "Confirm" => "Apakah anda menyetujui data retur yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
+                    "Confirm" => "Apakah anda menyetujui data posretur yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
                 $settings["actions"][] = array("Text" => "Batal Approve", "Url" => "ap.apreturn/unapprove", "Class" => "bt_reject", "ReqId" => 2,
                     "Error" => "Mohon memilih Data Retur terlebih dahulu sebelum proses pembatalan.",
-                    "Confirm" => "Apakah anda mau membatalkan approval data retur yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
+                    "Confirm" => "Apakah anda mau membatalkan approval data posretur yang dipilih ?\nKlik OK untuk melanjutkan prosedur");
             }
         } else {
             $settings["from"] = "vw_ap_return_master AS a";
@@ -477,7 +477,7 @@ class ApReturnController extends AppController {
             $log = new UserAdmin();
             $return = $return->FindById($id);
             /** @var $return ApReturn */
-            // process retur
+            // process posretur
             if($return->RbStatus == 1){
                 if ($return->RbAmount > 0) {
                     $rs = $return->Approve($return->Id);
@@ -516,7 +516,7 @@ class ApReturnController extends AppController {
             $log = new UserAdmin();
             $return = $return->FindById($id);
             /** @var $return ApReturn */
-            // process retur
+            // process posretur
             if($return->RjStatus == 2){
                 $rs = $return->Unapprove($return->Id);
                 if ($rs) {
